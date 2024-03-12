@@ -1,0 +1,24 @@
+#!/bin/bash
+
+cd /usr/share/GeoIP
+echo "Checking for updates..."
+for i in GeoLite2-City.mmdb GeoLite2-Country.mmdb; do
+  if curl -s -f http://maxmind-geoip-proxy.example.com/${i} -z ${i} -o ${i}.new; then
+    echo "${i}: checked"
+  else
+    echo "${i}: fail"
+    exit 1
+  fi
+done
+
+newfiles=`ls -1| grep '.new'`
+newfilescount=`ls -1| grep -c '.new'`
+if [[ $newfilescount -gt 0 ]]; then
+  echo "Update in progress..."
+  for file in $newfiles; do
+    mv "$file" "${file%.new}" && echo "${file%.new}: updated"
+  done
+else
+  echo "No new updates available"
+fi
+
